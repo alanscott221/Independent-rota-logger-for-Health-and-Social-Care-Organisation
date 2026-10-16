@@ -28,14 +28,14 @@ Because data is stored per device, use **Settings & backup → Export backup** n
 2. Repo **Settings → Pages**: Source = *Deploy from a branch*, Branch = `main`, folder = `/ (root)`.
 3. After a minute the site is live at `https://<your-username>.github.io/<repo-name>/`.
 
-When you change any file, edit `CACHE = 'rota-logger-v2'` in `sw.js` (e.g. to `v2`) so installed copies pick up the update.
+When you change any file, edit `CACHE = 'rota-logger-v4'` in `sw.js` (e.g. to `v2`) so installed copies pick up the update.
 
 ## Customise for your workplace
 
 Open `index.html` and look near the top of the `<script>`:
 
 - `PER` – the accounting periods: `["Label", "start date (a Monday), YYYY-MM-DD", number of weeks]`
-- `DEFSV` – the default service/location names (users can also edit their list in Settings)
+- `DEFSV` – the default service names ("Service 1", "Service 2"). Users rename them in Settings, or import a small setup file such as `{"svcs":["My Service A","My Service B"]}` via *Settings → Import backup*
 - `ZH_AVG`, `ZH_WEEKS` – when the zero-hours note appears (average hours per week over at least this many complete weeks)
 - Contract hours per week can be changed in the app under *Settings & backup* (default 39).
 
