@@ -126,6 +126,11 @@ $('#weeks').onclick=ev=>{const x=ev.target.closest('[data-x]');
  const it=ev.target.closest('.it');
  if(it){const e=S.entries.find(e=>e.id===it.dataset.id);editId=e.id;$('#date').value=e.date;$('#type').value=e.type;$('#svc').innerHTML=sopts(e.svc||S.last.svc);setBlocks(bks(e));$('#lh').value=e.type==='al'||e.type==='sick'?e.h:'';$('#note').value=e.note;$('#save').textContent='Update entry';$('#cancel').style.display='';fields();scrollTo({top:0,behavior:'smooth'});return}
  const dl=ev.target.closest('.dl');if(dl){resetForm(dl.dataset.d);scrollTo({top:0,behavior:'smooth'})}};
+$('#clr').onclick=()=>{if(!confirm('This permanently deletes ALL entries and settings stored on this device.\n\nHave you exported a backup? Continue?'))return;
+ if((prompt('Type DELETE to confirm')||'').trim().toUpperCase()!=='DELETE')return toast('Cancelled – nothing deleted');
+ try{localStorage.removeItem('rotaLogger')}catch(e){}
+ S={entries:[],contract:39,svcs:DEFSV.slice(),last:{st:'08:00',en:'16:00',br:30,svc:DEFSV[0]}};
+ $('#ct').value=39;$('#svct').value=S.svcs.join('\n');resetForm();render();scrollTo({top:0});toast('All data cleared')};
 $('#abt').onclick=()=>{$('#set').open=true;$('#set').scrollIntoView({behavior:'smooth'})};
 $('#svct').value=S.svcs.join('\n');
 $('#svct').onchange=e=>{const l=[...new Set(e.target.value.split('\n').map(x=>x.trim().slice(0,40)).filter(Boolean))];if(l.length)S.svcs=l;e.target.value=S.svcs.join('\n');save();resetForm($('#date').value);render()};
