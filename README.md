@@ -28,7 +28,7 @@ Because data is stored per device, use **Settings & backup → Export backup** n
 2. Repo **Settings → Pages**: Source = *Deploy from a branch*, Branch = `main`, folder = `/ (root)`.
 3. After a minute the site is live at `https://<your-username>.github.io/<repo-name>/`.
 
-When you change any file, edit `CACHE = 'rota-logger-v8'` in `sw.js` (e.g. to `v9`) so installed copies pick up the update.
+When you change any file, edit `CACHE = 'rota-logger-v9'` in `sw.js` (e.g. to `v10`) so installed copies pick up the update.
 
 ## Customise for your workplace
 
