@@ -73,11 +73,11 @@ details{margin-top:4px}summary{cursor:pointer;color:var(--mut);padding:6px 0}
 <section class="card noprint">
  <div class="grid">
   <div><label>Date</label><input type="date" id="date"></div>
-  <div><label>Type</label><select id="type"><option value="shift">Shift</option><option value="al">Annual leave (A/L)</option><option value="sick">Sick leave</option><option value="off">Day off (0 h)</option></select></div>
+  <div><label>Type</label><select id="type"><option value="shift">Shift</option><option value="al">Annual leave (A/L)</option><option value="sick">Sick leave</option><option value="off">Day off (0 h)</option><option value="other">Other</option></select></div>
   <div class="full" id="g-svc" style="display:none"><label>Service</label><select id="svc"></select></div>
   <div class="full" id="g-bl"><label>Parts of the day (each part can be a different service)</label><div id="blocks"></div><button type="button" class="alt" id="addb" style="padding:6px 12px">+ Add another part of the day</button></div>
   <div class="full" id="g-lh"><label>Hours credited</label><input type="number" id="lh" min="0" step="0.25" inputmode="decimal"></div>
-  <div class="full"><label>Note (optional)</label><input id="note" placeholder="Optional – never names of people you support"></div>
+  <div class="full"><label id="nl">Note (optional)</label><input id="note" placeholder="Optional – never names of people you support"></div>
  </div>
  <div class="prev" id="prev"></div>
  <div class="row"><button id="save">Add entry</button><button class="alt" id="cancel" style="display:none">Cancel</button></div>
@@ -92,6 +92,7 @@ details{margin-top:4px}summary{cursor:pointer;color:var(--mut);padding:6px 0}
   <div class="about"><p><b>About Rota Logger.</b> An independent checker for the hours published on your rota system. Log each shift as you work it, then compare the weekly and period totals with the rota and your payslip. If something doesn't match, you have your own dated record to raise with your manager.</p>
  <p><b>First step.</b> Rename “Service 1” and “Service 2” to your own services in <i>My services</i> below (one per line). You can also import a setup file from a colleague.</p>
  <p><b>Split days.</b> Use “Add another part of the day” for split shifts (e.g. 9–11 then 12–3). Each part can be a different service, so a day shared between two services is logged correctly.</p>
+ <p><b>Other.</b> For anything else (e.g. suspension, bought time, dependants’ leave, holiday with people you support), choose “Other” and describe it in the note. It counts as 0 h until you have clarified it with your Line Manager, so totals may be slightly out for those days.</p>
  <p><b>Overtime.</b> Hours worked in a period are compared with weekly contract hours × weeks. Over contract shows green; under shows red. Zero-hours? Set contract hours to 0 to see totals and averages instead.</p>
  <p><b>Privacy.</b> Everything stays on this device and nothing is sent anywhere. Never put names or personal details of people you support in notes. This app will never ask for a password or bank details. This is a personal record, not an official timesheet. Export a backup now and then.</p></div>
  <label class="sub">Contract hours per week (0 = zero-hours contract)</label><input type="number" id="ct" min="0" step="0.5" inputmode="decimal">

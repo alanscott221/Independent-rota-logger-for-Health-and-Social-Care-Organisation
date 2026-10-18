@@ -2,7 +2,7 @@
 
 A small offline app for logging your own shifts and checking them against your payslip.
 
-- Log date, start/finish, unpaid break and service; or mark A/L, Sick or a day off
+- Log date, start/finish, unpaid break and service; or mark A/L, Sick, a day off, or "Other" (described in the note, counted as 0 h until clarified)
 - Split days: add several parts of the day, each with its own service (split shifts, or a day across two services)
 - Zero-hours mode (contract hours = 0): totals, weekly averages and a short note about the UK Employment Rights Act 2025
 - Add your own services/locations in the app (Settings, or "+ Other service…" while logging)
@@ -28,7 +28,7 @@ Because data is stored per device, use **Settings & backup → Export backup** n
 2. Repo **Settings → Pages**: Source = *Deploy from a branch*, Branch = `main`, folder = `/ (root)`.
 3. After a minute the site is live at `https://<your-username>.github.io/<repo-name>/`.
 
-When you change any file, edit `CACHE = 'rota-logger-v4'` in `sw.js` (e.g. to `v2`) so installed copies pick up the update.
+When you change any file, edit `CACHE = 'rota-logger-v8'` in `sw.js` (e.g. to `v9`) so installed copies pick up the update.
 
 ## Customise for your workplace
 
