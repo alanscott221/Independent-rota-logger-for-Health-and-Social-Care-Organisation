@@ -16,7 +16,7 @@ function clean(x){const o={};if(!x||typeof x!=='object')return o;
  if(Array.isArray(x.entries))o.entries=x.entries.slice(0,5000).map(e=>{if(!e||!DT.test(e.date)||!Object.keys(TL).includes(e.type))return null;
   const r={id:/^[\w-]{1,30}$/.test(e.id)?e.id:Date.now()+Math.random().toString(36).slice(2,6),date:e.date,type:e.type,note:str(e.note,300)};
   if(e.type==='shift'){const bl=(Array.isArray(e.blocks)?e.blocks:e.st?[e]:[]).slice(0,12).map(blk).filter(Boolean);if(!bl.length)return null;r.blocks=bl;r.h=bl.reduce((a,b)=>a+Math.max(0,((m(b.en)-m(b.st)+1440)%1440-b.br)/60),0)}
-  else{r.h=e.type==='other'?0:num(e.h,0,24);if(e.type!=='off'&&e.type!=='other')r.svc=str(e.svc,40)}return r}).filter(Boolean);
+  else{r.h=num(e.h,0,24);if(e.type!=='off')r.svc=str(e.svc,40)}return r}).filter(Boolean);
  const c=+x.contract;if(isFinite(c)&&c>=0&&c<=80)o.contract=c;
  if(Array.isArray(x.svcs)){const l=[...new Set(x.svcs.map(v=>str(v,40).trim()).filter(Boolean))].slice(0,30);if(l.length)o.svcs=l}
  const lb=blk(x.last);if(lb)o.last=lb;if(x.seen)o.seen=1;return o}
@@ -39,9 +39,9 @@ const getBlocks=()=>rawBlocks().filter(b=>b.st&&b.en);
 function otherSvc(sel){if(sel.value!=='__o')return;const n=(prompt('Name of the service / location:')||'').trim().slice(0,40);
  if(n&&!S.svcs.includes(n)){S.svcs.push(n);save();$('#svct').value=S.svcs.join('\n')}
  const keep=n||S.last.svc;document.querySelectorAll('#blocks select,#svc').forEach(x=>x.innerHTML=sopts(x===sel?keep:x.value))}
-function formHours(){const t=$('#type').value;if(t==='off'||t==='other')return 0;if(t!=='shift')return+$('#lh').value||0;return getBlocks().reduce((a,b)=>a+bh(b),0)}
+function formHours(){const t=$('#type').value;if(t==='off')return 0;if(t!=='shift')return Math.min(24,Math.max(0,+$('#lh').value||0));return getBlocks().reduce((a,b)=>a+bh(b),0)}
 function fields(){const t=$('#type').value,l=t==='al'||t==='sick';
- $('#g-svc').style.display=l?'':'none';$('#g-lh').style.display=l?'':'none';$('#g-bl').style.display=t==='shift'?'':'none';
+ $('#g-svc').style.display=(l||t==='other')?'':'none';$('#g-lh').style.display=(l||t==='other')?'':'none';$('#lhl').textContent=t==='other'?'Hours worked (leave 0 if unsure)':'Hours credited';$('#g-bl').style.display=t==='shift'?'':'none';
  if(l&&!$('#lh').value)$('#lh').value=f(S.contract/5);
  $('#nl').textContent=t==='other'?'Describe the situation (required)':'Note (optional)';
  $('#prev').innerHTML='Hours: <span class="pos">'+f(formHours())+' h</span>'}
@@ -50,7 +50,7 @@ function saveEntry(){const date=$('#date').value,t=$('#type').value;if(!date)ret
  if(t==='other'&&!$('#note').value.trim()){$('#note').focus();return toast('Please describe the situation in the note')}
  const bl=getBlocks();if(t==='shift'){if(!bl.length)return toast('Enter start and finish times');if(rawBlocks().some(b=>!!b.st!==!!b.en))return toast('One part has only one time')}
  const e={id:editId||Date.now()+Math.random().toString(36).slice(2,5),date,type:t,h:formHours(),note:$('#note').value.trim()};
- if(t==='shift'){e.blocks=bl;S.last={st:bl[0].st,en:bl[0].en,br:bl[0].br,svc:bl[0].svc}}else if(t!=='off'&&t!=='other')e.svc=$('#svc').value;
+ if(t==='shift'){e.blocks=bl;S.last={st:bl[0].st,en:bl[0].en,br:bl[0].br,svc:bl[0].svc}}else if(t!=='off')e.svc=$('#svc').value;
  if(editId)S.entries=S.entries.map(x=>x.id===editId?e:x);else S.entries.push(e);
  save();const i=P.findIndex(p=>date>=p.s&&date<=p.e);if(i>=0)pi=i;
  const was=!!editId;resetForm(was?date:add(date,1));render();toast(was?'Updated':'Saved')}
@@ -71,7 +71,7 @@ const itemHtml=e=>{const b=bks(e),ss=[...new Set(e.type==='shift'?b.map(x=>x.svc
 function render(){const{p,es,C,tot,bal}=data();
  $('#ps').innerHTML=P.map((x,i)=>`<option value="${i}"${i===pi?' selected':''}>${x.n} · ${dm(x.s)}–${dm(x.e)}</option>`).join('');
  $('#pt').textContent='Rota – '+p.n+' ('+dmy(p.s)+' – '+dmy(p.e)+')';
- const by=svcH(es),a=avg12(),no=es.filter(e=>e.type==='other').length,nt=no?`<div class="sub">${no} “Other” entr${no>1?'ies':'y'} counted as 0 h – confirm with your Line Manager</div>`:'';
+ const by=svcH(es),a=avg12(),no=es.filter(e=>e.type==='other').length,nt=no?`<div class="sub">${no} “Other” entr${no>1?'ies':'y'} included as entered – confirm with your Line Manager</div>`:'';
  const hero=C>0?`<div class="lbl">Period balance · ${p.n}</div><div class="big ${cls(bal)}">${sg(bal)} h</div>
  <div class="sub">${f(tot)} h worked of ${f(C*p.w)} h contract (${p.w} weeks)</div>
  <div class="sub">${bal>0?f(bal)+' h overtime to claim':bal<0?f(-bal)+' h still to work':'Contract met exactly'}</div>`
@@ -90,13 +90,13 @@ function build(pdf){const{p,es,C,tot,bal}=data(),L=[],a=(t,b)=>L.push({t,b}),pd=
  for(let w=0;w<p.w;w++){const ws=add(p.s,w*7),we=add(ws,6),wk=es.filter(e=>e.date>=ws&&e.date<=we),wh=sum(wk);
   a(`WEEK ${w+1} (${dm(ws)} - ${dm(we)})`,1);if(!wk.length)a('No entries');
   wk.forEach(e=>{const dy=dn(e.date)+' '+dm(e.date);
-   if(e.type==='shift')bks(e).forEach(b=>row(dy,sh(b.svc),b.st+'-'+b.en+(b.br?', '+b.br+'m break':''),bh(b)));else row(dy,e.svc?sh(e.svc):'-',e.type==='other'?'Other (to be confirmed)':TL[e.type],e.h);
+   if(e.type==='shift')bks(e).forEach(b=>row(dy,sh(b.svc),b.st+'-'+b.en+(b.br?', '+b.br+'m break':''),bh(b)));else row(dy,e.svc?sh(e.svc):'-',e.type==='other'?'Other (see note)':TL[e.type],e.h);
    if(e.note)(pdf?e.note.match(/.{1,68}/g):[e.note]).forEach((x,i)=>a((pdf?'   ':'')+(i?'':'Note: ')+x))});
   a(C?`Week total: ${f(wh)}h (${sg(wh-C)}h vs ${C}h)`:`Week total: ${f(wh)}h`,1);a('')}
  a('BY SERVICE',1);const by=svcH(es);Object.keys(by).forEach(s=>a(s+': '+f(by[s])+'h'));a('');
  if(C){a('PERIOD TOTAL: '+f(tot)+'h of '+f(C*p.w)+'h',1);a('BALANCE: '+sg(bal)+'h'+(bal>0?' (overtime)':bal<0?' (under contract)':''),1)}
  else{a('PERIOD TOTAL: '+f(tot)+'h worked',1);a('Average: '+f(tot/p.w)+'h per week',1);const v=avg12();if(v)a(`Last ${v.n} complete weeks: average ${f(v.avg)}h per week`)}
- const no=es.filter(e=>e.type==='other').length;if(no)a(`Note: ${no} "Other" entr${no>1?'ies are':'y is'} counted as 0h until confirmed with the Line Manager.`);
+ const no=es.filter(e=>e.type==='other').length;if(no)a(`Note: ${no} "Other" entr${no>1?'ies are':'y is'} included as entered; to be confirmed with the Line Manager.`);
  a('');a('Logged '+dmy(today));return L}
 const summary=()=>build(0).map(l=>l.t).join('\n');
 function makePDF(L){const per=52,pg=[];for(let i=0;i<L.length;i+=per)pg.push(L.slice(i,i+per));
@@ -127,7 +127,7 @@ $('#pv').onclick=()=>{if(pi>0){pi--;render()}};$('#nx').onclick=()=>{if(pi<P.len
 $('#weeks').onclick=ev=>{const x=ev.target.closest('[data-x]');
  if(x){ev.stopPropagation();if(confirm('Delete this entry?')){S.entries=S.entries.filter(e=>e.id!==x.dataset.x);save();render()}return}
  const it=ev.target.closest('.it');
- if(it){const e=S.entries.find(e=>e.id===it.dataset.id);editId=e.id;$('#date').value=e.date;$('#type').value=e.type;$('#svc').innerHTML=sopts(e.svc||S.last.svc);setBlocks(bks(e));$('#lh').value=e.type==='al'||e.type==='sick'?e.h:'';$('#note').value=e.note;$('#save').textContent='Update entry';$('#cancel').style.display='';fields();scrollTo({top:0,behavior:'smooth'});return}
+ if(it){const e=S.entries.find(e=>e.id===it.dataset.id);editId=e.id;$('#date').value=e.date;$('#type').value=e.type;$('#svc').innerHTML=sopts(e.svc||S.last.svc);setBlocks(bks(e));$('#lh').value=e.type==='al'||e.type==='sick'||(e.type==='other'&&e.h)?e.h:'';$('#note').value=e.note;$('#save').textContent='Update entry';$('#cancel').style.display='';fields();scrollTo({top:0,behavior:'smooth'});return}
  const dl=ev.target.closest('.dl');if(dl){resetForm(dl.dataset.d);scrollTo({top:0,behavior:'smooth'})}};
 $('#clr').onclick=()=>{if(!confirm('This permanently deletes ALL entries and settings stored on this device.\n\nHave you exported a backup? Continue?'))return;
  if((prompt('Type DELETE to confirm')||'').trim().toUpperCase()!=='DELETE')return toast('Cancelled – nothing deleted');
